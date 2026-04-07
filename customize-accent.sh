@@ -5,6 +5,7 @@ set -e
 THEME_DIR=~/.themes/"Custom Shell Accent Theme"/gnome-shell
 BAK_FILE="$THEME_DIR/gnome-shell.css.bak"
 
+# not first time running this script
 # if theme and backup exist then just reuse the existing files
 if [[ -d "$THEME_DIR" && -f "$BAK_FILE" ]]; then
     echo "Existing theme detected at: $THEME_DIR"
@@ -27,10 +28,54 @@ if [[ -d "$THEME_DIR" && -f "$BAK_FILE" ]]; then
     echo "Done! Accent colour updated to $hex_color."
     echo ""
     echo "Theme location: $THEME_DIR"
+    echo "For the new colour to apply, switch to 'Default' and then to 'Custom Shell Accent Theme' again, using the 'User Themes' extension."
     exit 0
 fi
 
+# first time running this script
+# warning and ask to proceed
+shellversion=$(gnome-shell --version | awk '{print $3}')
+echo "Using GNOME Shell $shellversion"
+echo "Recommended for this script is: 49.5"
+echo ""
+
+major=${shellversion%%.*}
+
+if [[ "$major" == "49" ]] then
+  echo "You're using a tested version ($shellversion), nice!"
+  echo "Still, remember that things might break if you decide to update GNOME in the future."
+  echo "The theme won't apply automatically, you have to manually enable it with the 'User Themes' extension."
+  echo ""
+  read -p "Do you want to continue? [y/N]: " answer
+  if [[ ! "$answer" =~ ^[Yy]$ ]]; then
+    echo "Aborting."
+    exit 1
+  fi
+elif [[ "$major" == "47" || "$major" == "48" ]]; then
+  echo "CAUTION! GNOME Shell $shellversion has NOT been tested."
+  echo "Worst case scenario is that your GNOME Shell's colors and layout get messed up."
+  echo "Still, remember that things might break if you decide to update GNOME in the future."
+  echo "The theme won't apply automatically, you have to manually enable it with the 'User Themes' extension."
+  echo ""
+  read -p "Do you want to continue? [y/N]: " answer
+  if [[ ! "$answer" =~ ^[Yy]$ ]]; then
+    echo "Aborting."
+    exit 1
+  fi
+else
+  echo "ERROR: Unsupported GNOME Shell version: $shellversion"
+  echo "Only versions 47-49.5 are allowed."
+  echo "This script is not future-proof, and may break on versions 50+."
+  echo "Versions below 47 won't work at all."
+  exit 1
+fi
+
+clear
+echo "You acknowledged that things may break, proceeding.."
+echo ""
+
 # folders setup
+echo "Creating custom theme in ~/.themes/"
 mkdir -p ~/.themes/
 cd ~/.themes/
 
@@ -97,3 +142,4 @@ sed -i "s/-st-accent-color/$hex_color/g" gnome-shell.css
 echo "Done! All instances of -st-accent-color have been replaced with $hex_color in gnome-shell.css."
 echo ""
 echo "Theme location: ~/.themes/Custom Shell Accent Theme/gnome-shell/"
+echo "To apply the theme, use the 'User Themes' extension."
