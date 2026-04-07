@@ -41,7 +41,7 @@ echo ""
 
 major=${shellversion%%.*}
 
-if [[ "$major" == "49" ]] then
+if [[ "$major" == "49" ]]; then
   echo "You're using a tested version ($shellversion), nice!"
   echo "Still, remember that things might break if you decide to update GNOME in the future."
   echo "The theme won't apply automatically, you have to manually enable it with the 'User Themes' extension."
